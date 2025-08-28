@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>APC Interactive Electrical Safety Guide</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Industrial Safety Palette -->
+    <!-- Application Structure Plan: The SPA is structured as an interactive dashboard, not a linear document. It prioritizes the user's workflow: 1. Start with the foundational "Hierarchy of Controls" to reinforce the 'Elimination first' mindset. 2. Use a central "Dual-Hazard" layout (Shock vs. Arc Flash) to force a comprehensive risk assessment, mirroring the NFPA 70E requirement. 3. Group universal PPE to reduce redundancy. 4. Conclude with a practical, task-oriented application section. This structure was chosen to transform the report from a passive reference into an active cognitive tool that guides safe decision-making in the field. -->
+    <!-- Visualization & Content Choices: 
+        - Hierarchy of Controls -> Goal: Inform/Prioritize -> Method: Static HTML/CSS diagram -> Interaction: None -> Justification: Creates a constant, unmissable visual anchor for the primary safety principle.
+        - Approach Boundaries -> Goal: Inform/Organize -> Method: Interactive HTML/CSS diagram -> Interaction: Hover to reveal details -> Justification: Makes invisible danger zones tangible and interactive, improving engagement and retention over a static table.
+        - Glove Selection -> Goal: Guide Selection -> Method: Interactive cards -> Interaction: Click to highlight and view details -> Justification: A task-oriented approach that simplifies the decision process and reduces cognitive load.
+        - Arc Flash PPE -> Goal: Guide Selection/Compare -> Method: Interactive cards with visual dividers -> Interaction: Click to expand details -> Justification: Clearly shows the escalation of requirements between categories and serves as a pre-task checklist.
+        - Universal PPE -> Goal: Inform -> Method: Icon-based info grid -> Interaction: None -> Justification: Quick, visual, language-independent recognition of standard requirements.
+        - CONFIRMING NO SVG/Mermaid. All visuals are HTML/CSS or Chart.js Canvas. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc; /* slate-50 */
+        }
+        .card {
+            background-color: white;
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            transition: all 0.3s ease-in-out;
+        }
+        .tab-button {
+            transition: all 0.2s ease-in-out;
+        }
+        .tab-button.active {
+            background-color: #2563eb; /* blue-600 */
+            color: white;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+        }
+        .content-section {
+            display: none;
+        }
+        .content-section.active {
+            display: block;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+    </style>
+</head>
+<body class="text-slate-800">
+
+    <div class="container mx-auto p-4 md:p-8 max-w-7xl">
+        
+        <header class="text-center mb-8">
+            <h1 class="text-3xl md:text-4xl font-bold text-slate-900">Interactive Electrical Safety Guide</h1>
+            <p class="text-slate-600 mt-2">A Digital Tool for Arab Potash Company Personnel</p>
+        </header>
+
+        <main>
+            <!-- Section 1: Hierarchy of Controls -->
+            <section id="hierarchy" class="card p-6 mb-8">
+                <h2 class="text-2xl font-bold text-center mb-4 text-blue-700">The First Principle: Hierarchy of Controls</h2>
+                <p class="text-center text-slate-600 mb-6 max-w-3xl mx-auto">This hierarchy prioritizes safety strategies from most to least effective. Personal Protective Equipment (PPE) is always the last line of defense. Before any task, you must follow this order.</p>
+                <div class="flex flex-col md:flex-row justify-center items-center gap-4 text-center">
+                    <div class="p-4 bg-red-100 border-2 border-red-500 rounded-lg w-full md:w-auto">
+                        <div class="text-5xl mb-2">🛑</div>
+                        <h3 class="text-xl font-bold text-red-700">STOP: Eliminate</h3>
+                        <p class="text-red-600">First question: Can it be de-energized? This is the most effective control.</p>
+                    </div>
+                    <div class="text-2xl font-bold text-slate-400 hidden md:block">➔</div>
+                    <div class="p-4 bg-yellow-100 rounded-lg w-full md:w-auto">
+                        <div class="text-5xl mb-2">↔️</div>
+                        <h3 class="text-xl font-bold text-yellow-700">Substitute</h3>
+                        <p class="text-yellow-600">Replace the hazard.</p>
+                    </div>
+                    <div class="text-2xl font-bold text-slate-400 hidden md:block">➔</div>
+                    <div class="p-4 bg-blue-100 rounded-lg w-full md:w-auto">
+                        <div class="text-5xl mb-2">🛡️</div>
+                        <h3 class="text-xl font-bold text-blue-700">Engineering</h3>
+                        <p class="text-blue-600">Isolate people.</p>
+                    </div>
+                    <div class="text-2xl font-bold text-slate-400 hidden md:block">➔</div>
+                    <div class="p-4 bg-indigo-100 rounded-lg w-full md:w-auto">
+                        <div class="text-5xl mb-2">📋</div>
+                        <h3 class="text-xl font-bold text-indigo-700">Administrative</h3>
+                        <p class="text-indigo-600">Change how people work.</p>
+                    </div>
+                    <div class="text-2xl font-bold text-slate-400 hidden md:block">➔</div>
+                    <div class="p-4 bg-slate-200 rounded-lg w-full md:w-auto">
+                        <div class="text-5xl mb-2">👷</div>
+                        <h3 class="text-xl font-bold text-slate-700">PPE</h3>
+                        <p class="text-slate-600">Protect the worker.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Navigation Tabs -->
+            <nav class="flex flex-wrap justify-center gap-2 md:gap-4 mb-8" id="tab-nav">
+                <button data-tab="hazards" class="tab-button active font-semibold py-2 px-4 rounded-full">1. Hazard Overview</button>
+                <button data-tab="shock" class="tab-button font-semibold py-2 px-4 rounded-full">2. Shock Protection</button>
+                <button data-tab="arcflash" class="tab-button font-semibold py-2 px-4 rounded-full">3. Arc Flash Protection</button>
+                <button data-tab="universal" class="tab-button font-semibold py-2 px-4 rounded-full">4. Universal PPE</button>
+                <button data-tab="tra" class="tab-button font-semibold py-2 px-4 rounded-full">5. Pre-Task Checklist</button>
+            </nav>
+
+            <!-- Content Sections -->
+            <div id="tab-content">
+                <!-- Hazard Overview -->
+                <section id="hazards" class="content-section active">
+                    <div class="card p-6">
+                        <h2 class="text-2xl font-bold text-center mb-4 text-blue-700">Understanding the Dual Threats</h2>
+                        <p class="text-center text-slate-600 mb-8 max-w-3xl mx-auto">Effective protection starts with identifying the two distinct electrical hazards. Each requires a different protective strategy. Your Task Risk Assessment (TRA) must consider both.</p>
+                        <div class="grid md:grid-cols-2 gap-8">
+                            <div class="p-6 border-4 border-yellow-400 rounded-lg bg-yellow-50">
+                                <h3 class="text-2xl font-bold text-yellow-800 flex items-center gap-3"><span class="text-4xl">⚡</span>Electric Shock</h3>
+                                <p class="mt-2 text-yellow-700">Occurs when your body becomes part of an electrical circuit. Current passes through you, causing severe burns, cardiac arrest, or death.</p>
+                                <p class="mt-4 font-bold text-lg text-yellow-900">Primary Protection: <span class="bg-yellow-200 px-2 py-1 rounded">Insulation</span></p>
+                            </div>
+                            <div class="p-6 border-4 border-red-500 rounded-lg bg-red-50">
+                                <h3 class="text-2xl font-bold text-red-800 flex items-center gap-3"><span class="text-4xl">🔥</span>Arc Flash</h3>
+                                <p class="mt-2 text-red-700">A violent, explosive release of energy from an electric arc. Creates a plasma fireball up to 20,000°C with a supersonic blast wave.</p>
+                                <p class="mt-4 font-bold text-lg text-red-900">Primary Protection: <span class="bg-red-200 px-2 py-1 rounded">Arc-Rated (AR) Clothing</span></p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Shock Protection -->
+                <section id="shock" class="content-section">
+                    <div class="card p-6">
+                        <h2 class="text-2xl font-bold text-center mb-4 text-yellow-700">⚡ Shock Protection</h2>
+                        <p class="text-center text-slate-600 mb-8 max-w-3xl mx-auto">This section covers the invisible boundaries and essential insulated equipment required to protect against electric shock when working on or near energized parts.</p>
+                        
+                        <div class="mb-8">
+                            <h3 class="text-xl font-bold mb-4 text-center">Shock Approach Boundaries</h3>
+                            <div class="relative w-full max-w-lg mx-auto h-64 flex items-center justify-center" id="boundary-diagram">
+                                <div class="absolute text-center">
+                                    <div class="w-12 h-12 bg-yellow-500 rounded-full flex items-center justify-center text-2xl font-bold text-white">⚡</div>
+                                    <p class="font-semibold mt-1">Energized Part</p>
+                                </div>
+                                <div class="boundary-circle absolute w-48 h-48 border-2 border-dashed border-red-500 rounded-full" data-boundary="restricted"></div>
+                                <div class="boundary-circle absolute w-64 h-64 border-2 border-dashed border-blue-500 rounded-full" data-boundary="limited"></div>
+                                <div id="boundary-tooltip" class="absolute top-0 left-1/2 -translate-x-1/2 -mt-8 bg-slate-800 text-white text-sm rounded py-1 px-3 opacity-0 transition-opacity duration-300 pointer-events-none"></div>
+                            </div>
+                             <p class="text-center text-sm text-slate-500 mt-2">Hover over the boundary lines to see details.</p>
+                        </div>
+
+                        <div class="grid md:grid-cols-2 gap-8 items-start">
+                            <div class="border p-4 rounded-lg">
+                                <h3 class="text-xl font-bold mb-2">Boundary Rules</h3>
+                                <div id="restricted-info" class="mb-4">
+                                    <h4 class="font-bold text-red-600">Restricted Approach Boundary</h4>
+                                    <p class="text-sm">Increased risk of shock. ONLY Qualified Persons wearing voltage-rated gloves and other required PPE may cross.</p>
+                                </div>
+                                <div id="limited-info">
+                                    <h4 class="font-bold text-blue-600">Limited Approach Boundary</h4>
+                                    <p class="text-sm">Shock hazard exists. Unqualified persons must NOT cross unless escorted by a Qualified Person.</p>
+                                </div>
+                            </div>
+                            <div class="border p-4 rounded-lg">
+                                <h3 class="text-xl font-bold mb-2">Boundary Distances (AC)</h3>
+                                <table class="w-full text-sm text-left">
+                                    <thead class="bg-slate-100">
+                                        <tr>
+                                            <th class="p-2">System Voltage</th>
+                                            <th class="p-2 text-red-600">Restricted</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr class="border-b">
+                                            <td class="p-2">50V – 300V</td>
+                                            <td class="p-2">Avoid Contact</td>
+                                        </tr>
+                                        <tr class="border-b">
+                                            <td class="p-2">301V – 750V</td>
+                                            <td class="p-2">0.3 m (1 ft)</td>
+                                        </tr>
+                                        <tr class="border-b">
+                                            <td class="p-2">751V – 15 kV</td>
+                                            <td class="p-2">0.7 m (2 ft 2 in)</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="p-2">15.1 kV – 36 kV</td>
+                                            <td class="p-2">0.8 m (2 ft 7 in)</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        
+                        <hr class="my-8">
+
+                        <div>
+                            <h3 class="text-xl font-bold mb-4 text-center">Primary Defense: Insulating Glove Selection</h3>
+                            <div id="glove-selector" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+                            </div>
+                        </div>
+                        <div id="glove-details" class="mt-6 p-4 rounded-lg bg-slate-100 min-h-[150px]">
+                            <p class="text-center text-slate-500">Select a glove class to see details.</p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Arc Flash Protection -->
+                <section id="arcflash" class="content-section">
+                    <div class="card p-6">
+                        <h2 class="text-2xl font-bold text-center mb-4 text-red-700">🔥 Arc Flash Protection</h2>
+                        <p class="text-center text-slate-600 mb-8 max-w-3xl mx-auto">This section helps you select the complete head-to-toe Arc-Rated (AR) ensemble required to protect against the intense heat and pressure of an arc flash event.</p>
+                        
+                        <div class="text-center p-4 bg-red-50 border border-red-200 rounded-lg mb-8">
+                            <h3 class="text-xl font-bold text-red-800">Arc Flash Boundary (AFB)</h3>
+                            <p class="text-red-700">The distance where an unprotected worker could get a 2nd-degree burn. You MUST wear full AR PPE to cross.</p>
+                            <p class="mt-2 font-semibold text-sm">Rule of Thumb: For systems ≤ 600V, the AFB is a minimum of <span class="font-bold">4 feet (1.2 m)</span> unless an incident energy analysis says otherwise.</p>
+                        </div>
+
+                        <div>
+                            <h3 class="text-xl font-bold mb-4 text-center">Arc Flash PPE Categories</h3>
+                            <div id="arc-flash-categories" class="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
+                            </div>
+                        </div>
+                        <div id="arc-flash-details" class="mt-6 p-4 rounded-lg bg-slate-100 min-h-[200px]">
+                             <p class="text-center text-slate-500">Select a PPE Category to see the required ensemble.</p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Universal PPE -->
+                <section id="universal" class="content-section">
+                    <div class="card p-6">
+                        <h2 class="text-2xl font-bold text-center mb-4 text-blue-700">🛡️ Universal Head-to-Toe Protection</h2>
+                        <p class="text-center text-slate-600 mb-8 max-w-3xl mx-auto">The following PPE is foundational for most electrical work. Ensure every component meets the required safety standards.</p>
+                        <div class="grid md:grid-cols-3 gap-8">
+                            <!-- Head Protection -->
+                            <div class="p-4 border rounded-lg">
+                                <h3 class="text-xl font-bold mb-4 flex items-center gap-2"><span class="text-3xl">👷</span>Head Protection</h3>
+                                <p class="text-sm text-slate-600 mb-4">Must comply with ANSI Z89.1 standard.</p>
+                                <ul class="space-y-3">
+                                    <li class="flex items-start gap-3 p-2 bg-green-100 rounded">
+                                        <span class="font-bold text-green-700 text-xl">✓</span>
+                                        <div>
+                                            <h4 class="font-semibold text-green-800">Class E (Electrical)</h4>
+                                            <p class="text-xs text-green-700">Required for high-voltage work (rated 20,000V).</p>
+                                        </div>
+                                    </li>
+                                    <li class="flex items-start gap-3 p-2 bg-yellow-100 rounded">
+                                        <span class="font-bold text-yellow-700 text-xl">!</span>
+                                        <div>
+                                            <h4 class="font-semibold text-yellow-800">Class G (General)</h4>
+                                            <p class="text-xs text-yellow-700">Low-voltage only (rated 2,200V).</p>
+                                        </div>
+                                    </li>
+                                    <li class="flex items-start gap-3 p-2 bg-red-100 rounded">
+                                        <span class="font-bold text-red-700 text-xl">✗</span>
+                                        <div>
+                                            <h4 class="font-semibold text-red-800">Class C & Vented</h4>
+                                            <p class="text-xs text-red-700">FORBIDDEN. Offers no electrical protection.</p>
+                                        </div>
+                                    </li>
+                                </ul>
+                            </div>
+                            <!-- Eye & Face Protection -->
+                            <div class="p-4 border rounded-lg">
+                                <h3 class="text-xl font-bold mb-4 flex items-center gap-2"><span class="text-3xl">👓</span>Eye & Face Protection</h3>
+                                <p class="text-sm text-slate-600 mb-4">Must comply with ANSI Z87.1 for impact resistance.</p>
+                                <ul class="space-y-3">
+                                    <li class="p-2 bg-slate-100 rounded">
+                                        <h4 class="font-semibold">Safety Glasses</h4>
+                                        <p class="text-xs text-slate-700">Required at all times, must have side shields.</p>
+                                    </li>
+                                    <li class="p-2 bg-slate-100 rounded">
+                                        <h4 class="font-semibold">Arc-Rated Face Shield</h4>
+                                        <p class="text-xs text-slate-700">Worn OVER safety glasses when arc flash hazard exists.</p>
+                                    </li>
+                                     <li class="p-2 bg-slate-100 rounded">
+                                        <h4 class="font-semibold">Arc Flash Hood</h4>
+                                        <p class="text-xs text-slate-700">Provides integrated eye/face protection for higher energy hazards.</p>
+                                    </li>
+                                </ul>
+                            </div>
+                            <!-- Foot Protection -->
+                            <div class="p-4 border rounded-lg">
+                                <h3 class="text-xl font-bold mb-4 flex items-center gap-2"><span class="text-3xl">🥾</span>Foot Protection</h3>
+                                <p class="text-sm text-slate-600 mb-4">Must comply with ASTM F2413 standard.</p>
+                                <div class="p-3 bg-blue-100 rounded mb-4">
+                                    <h4 class="font-semibold text-blue-800">Required: EH Rating</h4>
+                                    <p class="text-xs text-blue-700">Electrical Hazard (EH) rated footwear provides secondary shock protection (rated 18,000V).</p>
+                                </div>
+                                <div class="p-3 bg-red-100 rounded">
+                                    <h4 class="font-semibold text-red-800">Forbidden: SD or CD</h4>
+                                    <p class="text-xs text-red-700">Static Dissipative (SD) or Conductive (CD) footwear is dangerous and must NOT be worn.</p>
+                                </div>
+                                <div class="mt-4 p-2 bg-yellow-100 border-l-4 border-yellow-500 text-yellow-800 text-xs">
+                                    <strong>Warning:</strong> EH boots are secondary protection only and are useless when wet. They are NOT a substitute for gloves.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- TRA Checklist -->
+                <section id="tra" class="content-section">
+                    <div class="card p-6">
+                        <h2 class="text-2xl font-bold text-center mb-4 text-blue-700">📋 Final Pre-Task Safety Checklist</h2>
+                        <p class="text-center text-slate-600 mb-8 max-w-3xl mx-auto">Use this checklist to integrate the safety requirements into your Task Risk Assessment (TRA) before starting work. This serves as your final verification at the job site.</p>
+                        <div class="max-w-2xl mx-auto border-2 border-slate-300 rounded-lg p-6 bg-slate-50">
+                            <div class="space-y-4">
+                                <div class="p-3 rounded-lg bg-red-100 border border-red-200">
+                                    <label class="flex items-center space-x-3">
+                                        <input type="checkbox" class="h-5 w-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                                        <span class="font-semibold text-red-800">Hazard Eliminated? (ESWC Verified)</span>
+                                    </label>
+                                    <p class="text-xs text-red-700 ml-8">If YES, proceed with caution. If NO, complete the rest of this checklist.</p>
+                                </div>
+
+                                <div class="p-3 rounded-lg bg-white border">
+                                    <p class="font-semibold text-slate-800">Shock Boundaries Identified:</p>
+                                    <div class="mt-2 space-y-1 pl-4">
+                                        <p class="text-sm">Limited Approach Boundary: <span class="font-mono text-blue-600">______ ft/m</span></p>
+                                        <p class="text-sm">Restricted Approach Boundary: <span class="font-mono text-red-600">______ ft/m</span></p>
+                                    </div>
+                                </div>
+
+                                <div class="p-3 rounded-lg bg-white border">
+                                    <p class="font-semibold text-slate-800">Shock PPE Verified:</p>
+                                    <div class="mt-2 space-y-1 pl-4">
+                                        <p class="text-sm">Required Glove Class: <span class="font-mono text-blue-600">______</span></p>
+                                        <label class="flex items-center space-x-2 text-sm">
+                                            <input type="checkbox" class="h-4 w-4 rounded border-gray-300">
+                                            <span>Gloves Inspected (Visual & Air Test)</span>
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <div class="p-3 rounded-lg bg-white border">
+                                    <p class="font-semibold text-slate-800">Arc Flash Boundary Identified:</p>
+                                    <div class="mt-2 space-y-1 pl-4">
+                                        <p class="text-sm">Arc Flash Boundary: <span class="font-mono text-red-600">______ ft/m</span></p>
+                                    </div>
+                                </div>
+
+                                <div class="p-3 rounded-lg bg-white border">
+                                    <p class="font-semibold text-slate-800">Arc Flash PPE Verified:</p>
+                                    <div class="mt-2 space-y-1 pl-4">
+                                        <p class="text-sm">Required PPE Category: <span class="font-mono text-blue-600">______</span></p>
+                                        <label class="flex items-center space-x-2 text-sm">
+                                            <input type="checkbox" class="h-4 w-4 rounded border-gray-300">
+                                            <span>Full Ensemble Inspected & Worn Correctly</span>
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <div class="pt-4">
+                                    <p class="text-sm">Work Authorized By (Supervisor): _________________________</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </main>
+
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const tabs = document.querySelectorAll('.tab-button');
+            const contentSections = document.querySelectorAll('.content-section');
+
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    const targetTab = tab.dataset.tab;
+
+                    tabs.forEach(t => t.classList.remove('active'));
+                    tab.classList.add('active');
+
+                    contentSections.forEach(section => {
+                        if (section.id === targetTab) {
+                            section.classList.add('active');
+                        } else {
+                            section.classList.remove('active');
+                        }
+                    });
+                });
+            });
+
+            // Boundary Diagram Interaction
+            const boundaryCircles = document.querySelectorAll('.boundary-circle');
+            const boundaryTooltip = document.getElementById('boundary-tooltip');
+            const boundaryData = {
+                restricted: { text: 'Restricted Approach Boundary' },
+                limited: { text: 'Limited Approach Boundary' }
+            };
+
+            boundaryCircles.forEach(circle => {
+                circle.addEventListener('mouseover', (e) => {
+                    const boundaryType = e.target.dataset.boundary;
+                    boundaryTooltip.textContent = boundaryData[boundaryType].text;
+                    boundaryTooltip.style.opacity = '1';
+                });
+                circle.addEventListener('mouseout', () => {
+                    boundaryTooltip.style.opacity = '0';
+                });
+                circle.addEventListener('mousemove', (e) => {
+                    const diagramRect = e.target.parentElement.getBoundingClientRect();
+                    boundaryTooltip.style.left = `${e.clientX - diagramRect.left}px`;
+                    boundaryTooltip.style.top = `${e.clientY - diagramRect.top - 30}px`;
+                });
+            });
+
+            // Glove Data and Selector
+            const gloveData = [
+                { class: '00', voltage: '500V', color: 'Beige', colorHex: '#f5f5dc' },
+                { class: '0', voltage: '1,000V', color: 'Red', colorHex: '#ef4444' },
+                { class: '1', voltage: '7,500V', color: 'White', colorHex: '#ffffff' },
+                { class: '2', voltage: '17,000V', color: 'Yellow', colorHex: '#facc15' },
+                { class: '3', voltage: '26,500V', color: 'Green', colorHex: '#4ade80' },
+                { class: '4', voltage: '36,000V', color: 'Orange', colorHex: '#fb923c' },
+            ];
+            const gloveSelector = document.getElementById('glove-selector');
+            const gloveDetails = document.getElementById('glove-details');
+
+            gloveData.forEach(glove => {
+                const button = document.createElement('button');
+                button.className = 'glove-button p-4 border rounded-lg text-center cursor-pointer hover:bg-slate-100 hover:shadow-md transition';
+                button.dataset.class = glove.class;
+                button.innerHTML = `
+                    <div class="w-8 h-4 mx-auto rounded mb-2 border border-slate-300" style="background-color: ${glove.colorHex};"></div>
+                    <p class="font-bold">Class ${glove.class}</p>
+                    <p class="text-sm text-slate-600">${glove.voltage}</p>
+                `;
+                gloveSelector.appendChild(button);
+            });
+
+            gloveSelector.addEventListener('click', e => {
+                const button = e.target.closest('.glove-button');
+                if (!button) return;
+
+                document.querySelectorAll('.glove-button').forEach(btn => btn.classList.remove('bg-blue-100', 'border-blue-500'));
+                button.classList.add('bg-blue-100', 'border-blue-500');
+
+                const selectedGlove = gloveData.find(g => g.class === button.dataset.class);
+                gloveDetails.innerHTML = `
+                    <h4 class="font-bold text-lg">Class ${selectedGlove.class} Details</h4>
+                    <p><strong>Max Use Voltage:</strong> ${selectedGlove.voltage} AC</p>
+                    <p><strong>Label Color:</strong> ${selectedGlove.color}</p>
+                    <div class="mt-4 p-3 bg-yellow-100 border-l-4 border-yellow-500 text-yellow-800">
+                        <h5 class="font-semibold">Mandatory Daily Inspection (Before First Use)</h5>
+                        <ol class="list-decimal list-inside text-sm mt-1">
+                            <li><strong>Visual Inspection:</strong> Check for cuts, holes, tears, swelling, or texture changes.</li>
+                            <li><strong>Air Test:</strong> Roll cuff to trap air, then squeeze to check for leaks.</li>
+                        </ol>
+                    </div>
+                `;
+            });
+
+            // Arc Flash Data and Selector
+            const arcFlashData = [
+                { category: 1, rating: '4 cal/cm²', items: ['AR Long-Sleeve Shirt & Pants or Coverall', 'AR Face Shield or Arc Flash Hood', 'Hard Hat', 'Safety Glasses', 'Hearing Protection', 'Leather Gloves (or V-Rated Gloves w/ Protectors)', 'EH-Rated Leather Footwear'] },
+                { category: 2, rating: '8 cal/cm²', items: ['AR Long-Sleeve Shirt & Pants or Coverall', '<strong>AR Balaclava (Hood Sock)</strong>', 'AR Face Shield or Arc Flash Hood', 'Hard Hat', 'Safety Glasses', 'Hearing Protection', 'Leather Gloves (or V-Rated Gloves w/ Protectors)', 'EH-Rated Leather Footwear'] },
+                { category: 3, rating: '25 cal/cm²', items: ['<strong>AR Arc Flash Suit</strong> (Jacket & Pants or Coverall)', '<strong>AR Arc Flash Suit Hood</strong>', 'Hard Hat', 'Safety Glasses', 'Hearing Protection', '<strong>AR Gloves</strong> (or V-Rated Gloves w/ Protectors)', 'EH-Rated Leather Footwear'] },
+                { category: 4, rating: '40 cal/cm²', items: ['<strong>AR Arc Flash Suit</strong> (Jacket & Pants or Coverall)', '<strong>AR Arc Flash Suit Hood</strong>', 'Hard Hat', 'Safety Glasses', 'Hearing Protection', '<strong>AR Gloves</strong> (or V-Rated Gloves w/ Protectors)', 'EH-Rated Leather Footwear'] }
+            ];
+            const arcFlashCategories = document.getElementById('arc-flash-categories');
+            const arcFlashDetails = document.getElementById('arc-flash-details');
+            
+            arcFlashData.forEach(cat => {
+                const isHighEnergy = cat.category >= 3;
+                const card = document.createElement('div');
+                card.className = `arc-flash-card p-4 border-2 rounded-lg text-center cursor-pointer hover:shadow-xl transition ${isHighEnergy ? 'border-red-500 bg-red-50' : 'border-blue-500 bg-blue-50'}`;
+                card.dataset.category = cat.category;
+                card.innerHTML = `
+                    <p class="text-sm font-semibold ${isHighEnergy ? 'text-red-600' : 'text-blue-600'}">Category</p>
+                    <p class="text-4xl font-bold ${isHighEnergy ? 'text-red-700' : 'text-blue-700'}">${cat.category}</p>
+                    <p class="text-xs font-medium bg-white px-2 py-1 rounded-full inline-block mt-2">${cat.rating}</p>
+                `;
+                arcFlashCategories.appendChild(card);
+            });
+
+            arcFlashCategories.addEventListener('click', e => {
+                const card = e.target.closest('.arc-flash-card');
+                if (!card) return;
+
+                document.querySelectorAll('.arc-flash-card').forEach(c => c.classList.remove('ring-4', 'ring-offset-2', 'ring-indigo-500'));
+                card.classList.add('ring-4', 'ring-offset-2', 'ring-indigo-500');
+
+                const selectedCategory = arcFlashData.find(c => c.category == card.dataset.category);
+                const itemsHtml = selectedCategory.items.map(item => `<li class="text-sm">${item}</li>`).join('');
+                
+                arcFlashDetails.innerHTML = `
+                    <h4 class="font-bold text-lg">PPE Category ${selectedCategory.category} Required Ensemble</h4>
+                    <p class="text-sm mb-2"><strong>Minimum Arc Rating:</strong> ${selectedCategory.rating}</p>
+                    <ul class="list-disc list-inside space-y-1">${itemsHtml}</ul>
+                `;
+            });
+        });
+    </script>
+</body>
+</html>
